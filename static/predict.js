@@ -18,33 +18,29 @@ let modelLoaded = false;
 $( document ).ready(async function () {
 	modelLoaded = false;
 	$('.progress-bar').show();
-    console.log( "Loading model..." );
     model = await tf.loadGraphModel('model/model.json');
-    console.log( "Model loaded." );
 	$('.progress-bar').hide();
 	modelLoaded = true;
 });
 
 $("#predict-button").click(async function () {
-	if (!modelLoaded) { alert("The model must be loaded first"); return; }
-	if (!imageLoaded) { alert("Please select an image first"); return; }
+	if (!modelLoaded) { alert("Сначала должна быть загружена модель"); return; }
+	if (!imageLoaded) { alert("Сначала выберите изображение"); return; }
 	
 	let image = $('#selected-image').get(0);
 	
-	// Pre-process the image
-	console.log( "Loading image..." );
 	let tensor = tf.browser.fromPixels(image, 3)
-		.resizeNearestNeighbor([224, 224]) // change the image size
+		.resizeNearestNeighbor([224, 224])
 		.expandDims()
 		.toFloat()
-		.reverse(-1); // RGB -> BGR
+		.reverse(-1);
 	let predictions = await model.predict(tensor).data();
-	console.log(predictions);
+	
 	let top5 = Array.from(predictions)
-		.map(function (p, i) { // this is Array.map
+		.map(function (p, i) {
 			return {
 				probability: p,
-				className: TARGET_CLASSES[i] // we are selecting the value from the obj
+				className: TARGET_CLASSES[i]
 			};
 		}).sort(function (a, b) {
 			return b.probability - a.probability;
